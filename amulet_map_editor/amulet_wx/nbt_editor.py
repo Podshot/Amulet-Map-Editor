@@ -25,53 +25,54 @@ class NBTEditor(simple.SimplePanel):
             self.__class__.image_map = {
                 nbt.TAG_Byte: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt_tag_byte.png"), wx.BITMAP_TYPE_PNG
+                        op.join("img", "nbt", "nbt_tag_byte.png"), wx.BITMAP_TYPE_PNG
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Short: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt_tag_short.png"), wx.BITMAP_TYPE_PNG
+                        op.join("img", "nbt", "nbt_tag_short.png"), wx.BITMAP_TYPE_PNG
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Int: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt_tag_int.png"), wx.BITMAP_TYPE_PNG
+                        op.join("img", "nbt", "nbt_tag_int.png"), wx.BITMAP_TYPE_PNG
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Long: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt_tag_long.png"), wx.BITMAP_TYPE_PNG
+                        op.join("img", "nbt", "nbt_tag_long.png"), wx.BITMAP_TYPE_PNG
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Float: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt_tag_float.png"), wx.BITMAP_TYPE_PNG
+                        op.join("img", "nbt", "nbt_tag_float.png"), wx.BITMAP_TYPE_PNG
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Double: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt_tag_double.png"), wx.BITMAP_TYPE_PNG
+                        op.join("img", "nbt", "nbt_tag_double.png"), wx.BITMAP_TYPE_PNG
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_String: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt_tag_string.png"), wx.BITMAP_TYPE_PNG
+                        op.join("img", "nbt", "nbt_tag_string.png"), wx.BITMAP_TYPE_PNG
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Compound: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt_tag_compound.png"), wx.BITMAP_TYPE_PNG
+                        op.join("img", "nbt", "nbt_tag_compound.png"),
+                        wx.BITMAP_TYPE_PNG,
                     ).ConvertToBitmap()
                 ),
                 nbt.NBTFile: self.image_list.ImageCount - 1,
                 nbt.TAG_List: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt_tag_list.png"), wx.BITMAP_TYPE_PNG
+                        op.join("img", "nbt", "nbt_tag_list.png"), wx.BITMAP_TYPE_PNG
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Byte_Array: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt_tag_array.png"), wx.BITMAP_TYPE_PNG
+                        op.join("img", "nbt", "nbt_tag_array.png"), wx.BITMAP_TYPE_PNG
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Int_Array: self.image_list.ImageCount - 1,
@@ -81,17 +82,6 @@ class NBTEditor(simple.SimplePanel):
 
         self.tree = self.build_tree(root_tag_name)
         self.add_object(self.tree, 0, wx.ALL | wx.CENTER | wx.EXPAND)
-
-        nbt_button_row = simple.SimplePanel(self, wx.HORIZONTAL)
-        self.add_tag_button = wx.Button(nbt_button_row, label="Add Tag")
-        self.edit_tag_button = wx.Button(nbt_button_row, label="Edit Tag")
-        nbt_button_row.add_object(self.add_tag_button)
-        nbt_button_row.add_object(self.edit_tag_button)
-
-        self.add_tag_button.Bind(wx.EVT_BUTTON, self.add_tag)
-        self.edit_tag_button.Bind(wx.EVT_BUTTON, self.edit_tag)
-
-        self.add_object(nbt_button_row, space=0)
 
         button_row = simple.SimplePanel(self, wx.HORIZONTAL)
         self.commit_button = wx.Button(button_row, label="Commit")
@@ -125,9 +115,9 @@ class NBTEditor(simple.SimplePanel):
                 elif isinstance(value, MutableSequence):
                     new_child = _tree.AppendItem(_parent, key)
 
-                    for item in value:
+                    for i, item in enumerate(value):
                         child_child = _tree.AppendItem(new_child, f"{item.value}")
-                        tree.SetItemData(child_child, ("", item))
+                        tree.SetItemData(child_child, (i, item))
                         tree.SetItemImage(
                             child_child,
                             self.image_map.get(item.__class__, self.other),
@@ -156,11 +146,70 @@ class NBTEditor(simple.SimplePanel):
 
         add_tree_node(tree, root, self.nbt_data)
 
-        tree.Bind(wx.EVT_TREE_SEL_CHANGED, self.selection_changed)
+        tree.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.tree_right_click)
 
         return tree
 
-    def add_tag(self, evt):
+    def _generate_menu(self, include_add_tag=False):
+        menu = wx.Menu()
+
+        menu_items = [
+            wx.MenuItem(menu, text="Edit Tag", id=wx.ID_ANY),
+            wx.MenuItem(menu, text="Delete Tag", id=wx.ID_ANY),
+        ]
+
+        if include_add_tag:
+            menu_items.insert(0, wx.MenuItem(menu, text="Add Tag", id=wx.ID_ANY))
+
+        for menu_item in menu_items:
+            menu.Append(menu_item)
+
+        op_map = {
+            item.GetId(): item.GetItemLabelText().split()[0].lower()
+            for item in menu_items
+        }
+        menu.Bind(wx.EVT_MENU, lambda evt: self.popup_menu_handler(op_map, evt))
+
+        return menu
+
+    def tree_right_click(self, evt):
+        tag_name, tag_obj = self.tree.GetItemData(evt.GetItem())
+
+        menu = self._generate_menu(
+            isinstance(tag_obj, (MutableMapping, MutableSequence))
+        )
+        self.PopupMenu(menu, evt.GetPoint())
+        menu.Destroy()
+        evt.Skip()
+
+    def popup_menu_handler(self, op_map, evt):
+        op_id = evt.GetId()
+        op_name = op_map[op_id]
+
+        if op_name == "add":
+            self.add_tag()
+        elif op_name == "edit":
+            self.edit_tag()
+        else:
+            selected_tag = self.tree.GetFocusedItem()
+
+            if selected_tag == self.tree.GetRootItem():
+                wx.MessageBox("Root nodes cannot be deleted currently", "Info", wx.OK)
+                return
+
+            name, _ = self.tree.GetItemData(selected_tag)
+            parent = self.tree.GetItemParent(selected_tag)
+
+            if parent == self.tree.GetRootItem():
+                parent_data = self.nbt_data
+            else:
+                _, parent_data = self.tree.GetItemData(parent)
+
+            del parent_data[name]
+
+            self.tree.Delete(selected_tag)
+
+    def add_tag(self):
         selected_tag = self.tree.GetFocusedItem()
         name, data = self.tree.GetItemData(selected_tag)
 
@@ -178,8 +227,6 @@ class NBTEditor(simple.SimplePanel):
             self.tree.SetItemImage(new_child, self.image_map.get(tag_type, self.other))
             self.tree.SetItemData(new_child, (new_name, nbt_tag))
 
-            print(self.nbt_data)
-
         add_dialog = EditTagDialog(
             self,
             "",
@@ -194,10 +241,9 @@ class NBTEditor(simple.SimplePanel):
         )
         add_dialog.Show()
 
-    def edit_tag(self, evt):
+    def edit_tag(self):
         selected_tag = self.tree.GetFocusedItem()
         name, data = self.tree.GetItemData(selected_tag)
-        print(name, data)
 
         def save_func(new_name, new_tag_value, new_tag_type, old_name):
             tag_type = [
@@ -211,11 +257,10 @@ class NBTEditor(simple.SimplePanel):
                 selected_tag, self.image_map.get(tag_type, self.other)
             )
             self.tree.SetItemData(selected_tag, (new_name, nbt_tag))
+            self.tree.SetItemText(selected_tag, f"{new_name}: {new_tag_value}")
 
             if new_name != old_name:
                 del self.nbt_data[old_name]
-
-            print(self.nbt_data)
 
         edit_dialog = EditTagDialog(
             self,
@@ -229,17 +274,6 @@ class NBTEditor(simple.SimplePanel):
             save_callback=save_func,
         )
         edit_dialog.Show()
-
-    def selection_changed(self, evt):
-        item = evt.GetItem()
-        name, data = self.tree.GetItemData(item)
-
-        if isinstance(data, MutableMapping):
-            self.add_tag_button.Enable()
-        elif isinstance(data, MutableSequence):
-            self.add_tag_button.Enable()
-        else:
-            self.add_tag_button.Disable()
 
 
 class EditTagDialog(wx.Frame):
