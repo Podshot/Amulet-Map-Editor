@@ -25,54 +25,63 @@ class NBTEditor(simple.SimplePanel):
             self.__class__.image_map = {
                 nbt.TAG_Byte: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt", "nbt_tag_byte.png"), wx.BITMAP_TYPE_PNG
+                        op.join("..", "img", "nbt", "nbt_tag_byte.png"),
+                        wx.BITMAP_TYPE_PNG,
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Short: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt", "nbt_tag_short.png"), wx.BITMAP_TYPE_PNG
+                        op.join("..", "img", "nbt", "nbt_tag_short.png"),
+                        wx.BITMAP_TYPE_PNG,
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Int: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt", "nbt_tag_int.png"), wx.BITMAP_TYPE_PNG
+                        op.join("..", "img", "nbt", "nbt_tag_int.png"),
+                        wx.BITMAP_TYPE_PNG,
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Long: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt", "nbt_tag_long.png"), wx.BITMAP_TYPE_PNG
+                        op.join("..", "img", "nbt", "nbt_tag_long.png"),
+                        wx.BITMAP_TYPE_PNG,
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Float: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt", "nbt_tag_float.png"), wx.BITMAP_TYPE_PNG
+                        op.join("..", "img", "nbt", "nbt_tag_float.png"),
+                        wx.BITMAP_TYPE_PNG,
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Double: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt", "nbt_tag_double.png"), wx.BITMAP_TYPE_PNG
+                        op.join("..", "img", "nbt", "nbt_tag_double.png"),
+                        wx.BITMAP_TYPE_PNG,
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_String: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt", "nbt_tag_string.png"), wx.BITMAP_TYPE_PNG
+                        op.join("..", "img", "nbt", "nbt_tag_string.png"),
+                        wx.BITMAP_TYPE_PNG,
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Compound: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt", "nbt_tag_compound.png"),
+                        op.join("..", "img", "nbt", "nbt_tag_compound.png"),
                         wx.BITMAP_TYPE_PNG,
                     ).ConvertToBitmap()
                 ),
                 nbt.NBTFile: self.image_list.ImageCount - 1,
                 nbt.TAG_List: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt", "nbt_tag_list.png"), wx.BITMAP_TYPE_PNG
+                        op.join("..", "img", "nbt", "nbt_tag_list.png"),
+                        wx.BITMAP_TYPE_PNG,
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Byte_Array: self.image_list.Add(
                     wx.Image(
-                        op.join("img", "nbt", "nbt_tag_array.png"), wx.BITMAP_TYPE_PNG
+                        op.join("..", "img", "nbt", "nbt_tag_array.png"),
+                        wx.BITMAP_TYPE_PNG,
                     ).ConvertToBitmap()
                 ),
                 nbt.TAG_Int_Array: self.image_list.ImageCount - 1,
